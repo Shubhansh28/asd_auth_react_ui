@@ -11,9 +11,10 @@ function formatDate(value) {
   return Number.isNaN(date.getTime()) ? 'Recently reported' : date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
-export default function ItemCard({ item }) {
+export default function ItemCard({ item, canEdit, onEdit }) {
   const icon = iconByType[item.type?.toLowerCase()] || '✦'
   const isClaimed = item.status === 'claimed'
+  const publisherName = item.user?.username || item.username || 'Community member'
 
   return (
     <article className="item-card">
@@ -29,7 +30,8 @@ export default function ItemCard({ item }) {
         <p><span>⌖</span>{item.place}</p>
         <p><span>◷</span>{formatDate(item.createdAt)}</p>
       </div>
-      <div className="item-footer"><span>Contact</span><a href={`mailto:${item.contact}`}>{item.contact}</a></div>
+      <p className="item-publisher">Posted by <strong>{publisherName}</strong></p>
+      <div className="item-footer"><span>Contact</span><a href={`mailto:${item.contact}`}>{item.contact}</a>{canEdit && <button type="button" className="item-edit" onClick={() => onEdit(item)}>Edit</button>}</div>
     </article>
   )
 }

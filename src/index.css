@@ -6,6 +6,7 @@ html, body, #root { min-height: 100%; }
 body { margin: 0; min-width: 320px; overflow-x: hidden; }
 .password-toggle { flex: 0 0 auto; border: 0; padding: 5px; color: #7857b5; background: transparent; font-size: 11px; font-weight: 700; }
 .form-success { margin: -8px 0 17px; padding: 10px 12px; border-radius: 9px; color: #4f8655; background: #eaf6e8; font-size: 12px; font-weight: 600; }
+.item-publisher { margin: 15px 0 0; color: #918797; font-size: 11px; }.item-publisher strong { color: #675c72; }.item-edit { margin-left: auto; padding: 0; color: #7957b4; border: 0; background: none; font-size: 11px; font-weight: 700; }
 @media (max-width: 620px) { .auth-panel { min-height: auto; } }
 @media (max-width: 390px) { .home-page { padding: 0; }.home-shell { min-height: 100vh; border-radius: 0; }.navbar { padding: 0 15px; }.navbar nav { gap: 10px; }.nav-cta { padding: 8px 9px; }.hero-copy { padding: 55px 22px; }.hero h1, .items-hero h1 { font-size: 39px; }.hero-scene { min-height: 310px; }.auth-art { min-height: 335px; padding: 22px; }.auth-art-copy { margin-top: 32px; }.auth-art h1 { font-size: 35px; }.auth-art-copy > p:last-child { display: none; }.auth-panel { padding: 25px 20px 40px; }.auth-form-wrap h2 { font-size: 29px; }.input-wrap { padding: 0 11px; }.items-hero { padding: 48px 21px 35px; }.items-content { padding: 32px 14px 52px; }.items-heading { align-items: flex-start; }.refresh-button { padding: 8px; }.modal-backdrop { padding: 12px; }.modal { padding: 29px 18px 22px; } }
 button, input { font: inherit; }

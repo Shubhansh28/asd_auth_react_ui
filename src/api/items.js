@@ -34,3 +34,8 @@ export const createItem = (item) => request('/items', {
   method: 'POST',
   body: JSON.stringify(item),
 })
+
+export const updateItem = (id, item) => request(`/items/${id}`, {
+  method: 'PATCH',
+  body: JSON.stringify(item),
+})

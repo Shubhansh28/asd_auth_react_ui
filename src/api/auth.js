@@ -1,4 +1,4 @@
-import { setToken } from '../utils/auth'
+import { setToken, setUser } from '../utils/auth'
 
 const API_URL = (import.meta.env.VITE_API_URL || 'https://user-login-auth-9q25.onrender.com').replace(/\/+$/, '')
 
@@ -30,6 +30,7 @@ export async function login(credentials) {
   const data = await request('/login', credentials)
   if (!data.token) throw new Error('The server did not return an authentication token.')
   setToken(data.token)
+  if (data.user?.id && data.user?.username) setUser(data.user)
   return data
 }
 
