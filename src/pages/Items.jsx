@@ -4,7 +4,6 @@ import ItemCard from '../components/ItemCard'
 import ItemForm from '../components/ItemForm'
 import Modal from '../components/Modal'
 import { getItems } from '../api/items'
-import { getUser } from '../utils/auth'
 
 export default function Items() {
   const [items, setItems] = useState([])
@@ -12,7 +11,7 @@ export default function Items() {
   const [error, setError] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
-  const currentUser = getUser()
+  const [selectedItem, setSelectedItem] = useState(null)
 
   const loadItems = useCallback(async () => {
     setLoading(true)
@@ -24,18 +23,31 @@ export default function Items() {
 
   function openCreateModal() {
     setEditingItem(null)
+    setSelectedItem(null)
     setIsModalOpen(true)
   }
 
   function openEditModal(item) {
     setEditingItem(item)
+    setSelectedItem(null)
     setIsModalOpen(true)
+  }
+
+  function openDetailsModal(item) {
+    setEditingItem(null)
+    setSelectedItem(item)
+    setIsModalOpen(true)
+  }
+
+  function closeModal() {
+    setIsModalOpen(false)
+    setEditingItem(null)
+    setSelectedItem(null)
   }
 
   function handleSaved(savedItem) {
     setItems((current) => editingItem ? current.map((item) => item.id === savedItem.id ? { ...item, ...savedItem } : item) : [savedItem, ...current])
-    setIsModalOpen(false)
-    setEditingItem(null)
+    closeModal()
   }
 
   return (
@@ -50,9 +62,21 @@ export default function Items() {
         {loading && <div className="state-card">Gathering the latest reports…</div>}
         {error && <div className="state-card error-state"><p>{error}</p><button className="text-button" type="button" onClick={loadItems}>Try again →</button></div>}
         {!loading && !error && items.length === 0 && <div className="state-card"><span className="empty-star">✦</span><h3>No reports just yet.</h3><p>Be the first to report a lost item.</p><button className="primary-button" type="button" onClick={openCreateModal}>Report item <span>+</span></button></div>}
-        {!loading && !error && items.length > 0 && <div className="items-grid">{items.map((item) => <ItemCard item={item} key={item.id} canEdit={item.userId === currentUser?.id} onEdit={openEditModal} />)}</div>}
+        {!loading && !error && items.length > 0 && <div className="items-grid">{items.map((item) => <ItemCard item={item} key={item.id} onOpen={openDetailsModal} />)}</div>}
       </section>
-      {isModalOpen && <Modal title={editingItem ? 'Edit lost item' : 'Report a lost item'} onClose={() => { setIsModalOpen(false); setEditingItem(null) }}><ItemForm editingItem={editingItem} onSaved={handleSaved} /></Modal>}
+      {isModalOpen && selectedItem && <Modal title={selectedItem.name} eyebrow="Lost item details" onClose={closeModal}>
+        <div className="item-detail">
+          <span className="item-detail-status">{selectedItem.status || 'open'}</span>
+          <dl>
+            <div><dt>Category</dt><dd>{selectedItem.type}</dd></div>
+            <div><dt>Last seen at</dt><dd>{selectedItem.place}</dd></div>
+            <div><dt>Contact</dt><dd><a href={`mailto:${selectedItem.contact}`}>{selectedItem.contact}</a></dd></div>
+            <div><dt>Published by</dt><dd>{selectedItem.user?.username || selectedItem.username || 'Community member'}</dd></div>
+          </dl>
+          <button className="primary-button detail-edit" type="button" onClick={() => openEditModal(selectedItem)}>Edit this report <span>→</span></button>
+        </div>
+      </Modal>}
+      {isModalOpen && !selectedItem && <Modal title={editingItem ? 'Edit lost item' : 'Report a lost item'} eyebrow={editingItem ? 'Update report' : 'New report'} onClose={closeModal}><ItemForm editingItem={editingItem} onSaved={handleSaved} /></Modal>}
     </main>
   )
 }

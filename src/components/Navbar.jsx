@@ -20,7 +20,6 @@ export default function Navbar({ onReportItem }) {
         <NavLink to="/">Home</NavLink>
         {loggedIn ? (
           <>
-            <NavLink to="/items">Lost items</NavLink>
             {onReportItem && <button className="nav-report" type="button" onClick={onReportItem}>Report item</button>}
             <button className="nav-logout" type="button" onClick={logout}>Log out</button>
           </>
