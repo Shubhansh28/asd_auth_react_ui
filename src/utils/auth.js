@@ -1,14 +1,13 @@
-const TOKEN_KEY = 'token'
-const USER_KEY = 'user'
+export const isAuthenticated = (user) => Boolean(user?.id)
 
-export const getToken = () => localStorage.getItem(TOKEN_KEY)
-export const setToken = (token) => localStorage.setItem(TOKEN_KEY, token)
-export const getUser = () => {
-  try { return JSON.parse(localStorage.getItem(USER_KEY)) } catch { return null }
+export function messageForStatus(status, fallback = 'Something went wrong. Please try again.') {
+  const messages = {
+    400: 'Please check the information you entered and try again.',
+    401: 'Your session has expired. Please log in again.',
+    403: 'You do not have permission to make this change.',
+    404: 'This item could not be found. It may have been removed.',
+    500: 'The server is having trouble right now. Please try again shortly.',
+  }
+
+  return messages[status] || fallback
 }
-export const setUser = (user) => localStorage.setItem(USER_KEY, JSON.stringify({ id: user.id, username: user.username }))
-export const removeToken = () => {
-  localStorage.removeItem(TOKEN_KEY)
-  localStorage.removeItem(USER_KEY)
-}
-export const isAuthenticated = () => Boolean(getToken())

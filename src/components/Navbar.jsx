@@ -1,13 +1,15 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { isAuthenticated, removeToken } from '../utils/auth'
 
-export default function Navbar({ onReportItem }) {
-  const loggedIn = isAuthenticated()
+export default function Navbar({ user, onReportItem, onLogout }) {
+  const loggedIn = Boolean(user)
   const navigate = useNavigate()
 
-  function logout() {
-    removeToken()
-    navigate('/')
+  async function handleLogout() {
+    try {
+      await onLogout?.()
+    } finally {
+      navigate('/')
+    }
   }
 
   return (
@@ -21,7 +23,7 @@ export default function Navbar({ onReportItem }) {
         {loggedIn ? (
           <>
             {onReportItem && <button className="nav-report" type="button" onClick={onReportItem}>Report item</button>}
-            <button className="nav-logout" type="button" onClick={logout}>Log out</button>
+            <button className="nav-logout" type="button" onClick={handleLogout}>Log out</button>
           </>
         ) : (
           <>

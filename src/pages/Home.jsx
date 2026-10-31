@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom'
 import Navbar from '../components/Navbar'
-import { isAuthenticated } from '../utils/auth'
 
-export default function Home() {
-  const loggedIn = isAuthenticated()
+export default function Home({ user, onLogout }) {
+  const loggedIn = Boolean(user)
 
   return (
     <main className="home-page">
       <div className="home-shell">
-        <Navbar />
+        <Navbar user={user} onLogout={onLogout} />
         <section className="hero">
           <div className="hero-copy">
             <p className="eyebrow"><span className="eyebrow-dot" /> A little help goes a long way</p>

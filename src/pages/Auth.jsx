@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { login, signup } from '../api/auth'
 
-export default function Auth() {
+export default function Auth({ onAuthenticated }) {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState(searchParams.get('mode') === 'signup' ? 'signup' : 'login')
   const [credentials, setCredentials] = useState({ username: '', password: '' })
@@ -37,7 +37,8 @@ export default function Auth() {
     setIsSubmitting(true)
     try {
       if (isLogin) {
-        await login(credentials)
+        const user = await login(credentials)
+        onAuthenticated(user)
         navigate('/items')
       } else {
         await signup(credentials)

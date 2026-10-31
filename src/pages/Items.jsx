@@ -3,20 +3,28 @@ import Navbar from '../components/Navbar'
 import ItemCard from '../components/ItemCard'
 import ItemForm from '../components/ItemForm'
 import Modal from '../components/Modal'
-import { getItems } from '../api/items'
+import { deleteItem, getItems, updateItemStatus } from '../api/items'
 
-export default function Items() {
+export default function Items({ currentUser, onLogout }) {
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingItem, setEditingItem] = useState(null)
   const [selectedItem, setSelectedItem] = useState(null)
+  const [actionError, setActionError] = useState('')
+  const [isActioning, setIsActioning] = useState(false)
 
   const loadItems = useCallback(async () => {
     setLoading(true)
     setError('')
-    try { setItems(await getItems()) } catch (err) { setError(err.message) } finally { setLoading(false) }
+    try {
+      setItems(await getItems())
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
   }, [])
 
   useEffect(() => { loadItems() }, [loadItems])
@@ -24,18 +32,21 @@ export default function Items() {
   function openCreateModal() {
     setEditingItem(null)
     setSelectedItem(null)
+    setActionError('')
     setIsModalOpen(true)
   }
 
   function openEditModal(item) {
     setEditingItem(item)
     setSelectedItem(null)
+    setActionError('')
     setIsModalOpen(true)
   }
 
   function openDetailsModal(item) {
     setEditingItem(null)
     setSelectedItem(item)
+    setActionError('')
     setIsModalOpen(true)
   }
 
@@ -43,16 +54,49 @@ export default function Items() {
     setIsModalOpen(false)
     setEditingItem(null)
     setSelectedItem(null)
+    setActionError('')
   }
 
-  function handleSaved(savedItem) {
-    setItems((current) => editingItem ? current.map((item) => item.id === savedItem.id ? { ...item, ...savedItem } : item) : [savedItem, ...current])
+  async function handleSaved() {
+    await loadItems()
     closeModal()
   }
 
+  async function handleStatusChange(item, status) {
+    setActionError('')
+    setIsActioning(true)
+    try {
+      await updateItemStatus(item.id, status)
+      await loadItems()
+      closeModal()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setIsActioning(false)
+    }
+  }
+
+  async function handleDelete(item) {
+    if (!window.confirm(`Delete “${item.name}”? This cannot be undone.`)) return
+
+    setActionError('')
+    setIsActioning(true)
+    try {
+      await deleteItem(item.id)
+      await loadItems()
+      closeModal()
+    } catch (err) {
+      setActionError(err.message)
+    } finally {
+      setIsActioning(false)
+    }
+  }
+
+  const isOwner = selectedItem?.userId === currentUser?.id
+
   return (
     <main className="items-page">
-      <Navbar onReportItem={openCreateModal} />
+      <Navbar user={currentUser} onLogout={onLogout} onReportItem={openCreateModal} />
       <section className="items-hero">
         <div><p className="eyebrow"><span className="eyebrow-dot" /> Community noticeboard</p><h1>Lost, but not<br /><em>forgotten.</em></h1><p>Browse the latest reports and help a lost item make its way back to where it belongs.</p></div>
         <button className="primary-button items-report" onClick={openCreateModal}>Report lost item <span>+</span></button>
@@ -71,9 +115,14 @@ export default function Items() {
             <div><dt>Category</dt><dd>{selectedItem.type}</dd></div>
             <div><dt>Last seen at</dt><dd>{selectedItem.place}</dd></div>
             <div><dt>Contact</dt><dd><a href={`mailto:${selectedItem.contact}`}>{selectedItem.contact}</a></dd></div>
-            <div><dt>Published by</dt><dd>{selectedItem.user?.username || selectedItem.username || 'Community member'}</dd></div>
+            <div><dt>Published by</dt><dd>{selectedItem.user?.username || 'Community member'}</dd></div>
           </dl>
-          <button className="primary-button detail-edit" type="button" onClick={() => openEditModal(selectedItem)}>Edit this report <span>→</span></button>
+          {actionError && <p className="form-error" role="alert">{actionError}</p>}
+          {isOwner && <div className="detail-actions">
+            <button className="primary-button detail-edit" type="button" onClick={() => openEditModal(selectedItem)}>Edit this report <span>→</span></button>
+            <button className="claim-button" type="button" disabled={isActioning} onClick={() => handleStatusChange(selectedItem, 'claimed')}>{isActioning ? 'Saving…' : 'Mark as returned'}</button>
+            <button className="delete-button" type="button" disabled={isActioning} onClick={() => handleDelete(selectedItem)}>Delete report</button>
+          </div>}
         </div>
       </Modal>}
       {isModalOpen && !selectedItem && <Modal title={editingItem ? 'Edit lost item' : 'Report a lost item'} eyebrow={editingItem ? 'Update report' : 'New report'} onClose={closeModal}><ItemForm editingItem={editingItem} onSaved={handleSaved} /></Modal>}
