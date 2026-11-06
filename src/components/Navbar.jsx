@@ -1,4 +1,5 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { isAdmin } from '../utils/roles'
 
 export default function Navbar({ user, onReportItem, onLogout }) {
   const loggedIn = Boolean(user)
@@ -22,6 +23,7 @@ export default function Navbar({ user, onReportItem, onLogout }) {
         <NavLink to="/">Home</NavLink>
         {loggedIn ? (
           <>
+            {isAdmin(user) && <NavLink to="/admin">Admin dashboard</NavLink>}
             {onReportItem && <button className="nav-report" type="button" onClick={onReportItem}>Report item</button>}
             <button className="nav-logout" type="button" onClick={handleLogout}>Log out</button>
           </>

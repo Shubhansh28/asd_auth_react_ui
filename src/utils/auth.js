@@ -6,6 +6,7 @@ export function messageForStatus(status, fallback = 'Something went wrong. Pleas
     401: 'Your session has expired. Please log in again.',
     403: 'You do not have permission to make this change.',
     404: 'This item could not be found. It may have been removed.',
+    409: 'That username is already in use. Please choose another one.',
     500: 'The server is having trouble right now. Please try again shortly.',
   }
 

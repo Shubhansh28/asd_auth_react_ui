@@ -4,6 +4,7 @@ import ItemCard from '../components/ItemCard'
 import ItemForm from '../components/ItemForm'
 import Modal from '../components/Modal'
 import { deleteItem, getItems, updateItemStatus } from '../api/items'
+import { canManageOwnItem } from '../utils/roles'
 
 export default function Items({ currentUser, onLogout }) {
   const [items, setItems] = useState([])
@@ -92,7 +93,7 @@ export default function Items({ currentUser, onLogout }) {
     }
   }
 
-  const isOwner = selectedItem?.userId === currentUser?.id
+  const isOwner = canManageOwnItem(currentUser, selectedItem)
 
   return (
     <main className="items-page">

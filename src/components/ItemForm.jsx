@@ -21,13 +21,14 @@ export default function ItemForm({ editingItem, onSaved }) {
   async function handleSubmit(event) {
     event.preventDefault()
     setError('')
+    const changes = Object.fromEntries(Object.entries(item).filter(([field, value]) => value.trim() !== editingItem?.[field]))
+    if (isEditing && Object.keys(changes).length === 0) {
+      setError('Make a change before saving.')
+      return
+    }
+
     setIsSubmitting(true)
     try {
-      const changes = Object.fromEntries(Object.entries(item).filter(([field, value]) => value.trim() !== editingItem?.[field]))
-      if (isEditing && Object.keys(changes).length === 0) {
-        setError('Make a change before saving.')
-        return
-      }
       const savedItem = isEditing ? await updateItem(editingItem.id, changes) : await createItem(item)
       await onSaved(savedItem)
     } catch (err) {
