@@ -1,15 +1,19 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
 import { isAdmin } from '../utils/roles'
 
 export default function Navbar({ user, onReportItem, onLogout }) {
   const loggedIn = Boolean(user)
   const navigate = useNavigate()
+  const [logoutError, setLogoutError] = useState('')
 
   async function handleLogout() {
+    setLogoutError('')
     try {
       await onLogout?.()
-    } finally {
       navigate('/')
+    } catch (error) {
+      setLogoutError(error.message)
     }
   }
 
@@ -34,6 +38,7 @@ export default function Navbar({ user, onReportItem, onLogout }) {
           </>
         )}
       </nav>
+      {logoutError && <p className="nav-error" role="alert">{logoutError}</p>}
     </header>
   )
 }

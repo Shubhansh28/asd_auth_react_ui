@@ -1,6 +1,6 @@
 import { request } from './client'
 
-const adminOptions = { redirectOnUnauthorized: true, redirectOnForbiddenTo: '/items' }
+const adminOptions = { redirectOnUnauthorized: true, redirectOnForbiddenTo: '/access-denied' }
 
 export const getUserOverview = () => request('/admin/users/overview', { method: 'GET' }, adminOptions)
 export const getUserHistory = (userId) => request(`/admin/users/${userId}/history`, { method: 'GET' }, adminOptions)

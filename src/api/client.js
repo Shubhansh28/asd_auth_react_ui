@@ -18,7 +18,7 @@ function apiError(response, data, fallback) {
  */
 export async function request(path, options = {}, { redirectOnUnauthorized = false, redirectOnForbiddenTo } = {}) {
   const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 30000)
+  const timeout = setTimeout(() => controller.abort(), 15000)
 
   try {
     const response = await fetch(`${API_URL}${path}`, {

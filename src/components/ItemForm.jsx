@@ -3,7 +3,7 @@ import { createItem, updateItem } from '../api/items'
 
 const initialItem = { name: '', type: '', place: '', contact: '' }
 
-export default function ItemForm({ editingItem, onSaved }) {
+export default function ItemForm({ editingItem, onSaved, onDirtyChange }) {
   const isEditing = Boolean(editingItem)
   const [item, setItem] = useState(editingItem ? { name: editingItem.name, type: editingItem.type, place: editingItem.place, contact: editingItem.contact } : initialItem)
   const [error, setError] = useState('')
@@ -12,7 +12,13 @@ export default function ItemForm({ editingItem, onSaved }) {
   useEffect(() => {
     setItem(editingItem ? { name: editingItem.name, type: editingItem.type, place: editingItem.place, contact: editingItem.contact } : initialItem)
     setError('')
+    onDirtyChange?.(false)
   }, [editingItem])
+
+  useEffect(() => {
+    const baseline = editingItem ? { name: editingItem.name, type: editingItem.type, place: editingItem.place, contact: editingItem.contact } : initialItem
+    onDirtyChange?.(Object.keys(baseline).some((field) => item[field] !== baseline[field]))
+  }, [editingItem, item, onDirtyChange])
 
   function handleChange(event) {
     setItem((current) => ({ ...current, [event.target.name]: event.target.value }))

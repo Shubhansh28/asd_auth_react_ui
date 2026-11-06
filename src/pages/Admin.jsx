@@ -53,6 +53,7 @@ export default function Admin({ currentUser, onLogout, onSessionChanged }) {
   const [roleMessage, setRoleMessage] = useState('')
   const [actionError, setActionError] = useState('')
   const [isItemActioning, setIsItemActioning] = useState(false)
+  const [isFormDirty, setIsFormDirty] = useState(false)
 
   const loadOverview = useCallback(async () => {
     setLoadingUsers(true)
@@ -114,7 +115,10 @@ export default function Admin({ currentUser, onLogout, onSessionChanged }) {
 
       if (user.id === currentUser.id) {
         await onSessionChanged()
-        if (role !== 'admin') navigate('/items', { replace: true })
+        if (role !== 'admin') {
+          setRoleMessage('Your admin access was removed. Returning to the items page…')
+          setTimeout(() => navigate('/items', { replace: true }), 1200)
+        }
       }
     } catch (error) {
       setUsersError(error.message)
@@ -157,7 +161,14 @@ export default function Admin({ currentUser, onLogout, onSessionChanged }) {
 
   async function handleItemSaved() {
     setEditingItem(null)
+    setIsFormDirty(false)
     await refreshSelectedUser()
+  }
+
+  function closeEditor() {
+    if (isFormDirty && !window.confirm('Discard your unsaved changes?')) return
+    setEditingItem(null)
+    setIsFormDirty(false)
   }
 
   return <main className="admin-page">
@@ -180,6 +191,6 @@ export default function Admin({ currentUser, onLogout, onSessionChanged }) {
       {historyError && <div className="state-card error-state compact-state"><p>{historyError}</p><button className="text-button" type="button" onClick={() => loadHistory(selectedUser.id)}>Try again →</button></div>}
       {!loadingHistory && !historyError && history && <div className="admin-profile"><div className="profile-summary"><div><span>Role</span><strong className={`role-pill ${history.role}`}>{history.role}</strong></div><div><span>Joined</span><strong>{formatDateTime(history.dateCreated)}</strong></div><div><span>Last updated</span><strong>{formatDateTime(history.updatedAt)}</strong></div></div><div className="history-heading"><h3>All reports</h3><span>{history.items?.length || 0} total</span></div>{actionError && <p className="form-error" role="alert">{actionError}</p>}<ItemHistory items={history.items} busy={isItemActioning} onEdit={setEditingItem} onStatusChange={handleItemStatus} onDelete={handleItemDelete} /></div>}
     </Modal>}
-    {editingItem && <Modal title={`Edit ${editingItem.name}`} eyebrow="Admin report editor" onClose={() => setEditingItem(null)}><ItemForm editingItem={editingItem} onSaved={handleItemSaved} /></Modal>}
+    {editingItem && <Modal title={`Edit ${editingItem.name}`} eyebrow="Admin report editor" onClose={closeEditor}><ItemForm editingItem={editingItem} onSaved={handleItemSaved} onDirtyChange={setIsFormDirty} /></Modal>}
   </main>
 }

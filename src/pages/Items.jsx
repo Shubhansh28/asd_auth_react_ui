@@ -15,6 +15,7 @@ export default function Items({ currentUser, onLogout }) {
   const [selectedItem, setSelectedItem] = useState(null)
   const [actionError, setActionError] = useState('')
   const [isActioning, setIsActioning] = useState(false)
+  const [isFormDirty, setIsFormDirty] = useState(false)
 
   const loadItems = useCallback(async () => {
     setLoading(true)
@@ -56,6 +57,12 @@ export default function Items({ currentUser, onLogout }) {
     setEditingItem(null)
     setSelectedItem(null)
     setActionError('')
+    setIsFormDirty(false)
+  }
+
+  function requestModalClose() {
+    if (isFormDirty && !window.confirm('Discard your unsaved changes?')) return
+    closeModal()
   }
 
   async function handleSaved() {
@@ -103,13 +110,13 @@ export default function Items({ currentUser, onLogout }) {
         <button className="primary-button items-report" onClick={openCreateModal}>Report lost item <span>+</span></button>
       </section>
       <section className="items-content">
-        <div className="items-heading"><div><p className="eyebrow">Latest reports</p><h2>Things looking for home <span>({items.length})</span></h2></div><button className="refresh-button" type="button" onClick={loadItems}>↻ Refresh</button></div>
+        <div className="items-heading"><div><p className="eyebrow">Latest reports</p><h2>Things looking for home <span>({items.length})</span></h2></div><button className="refresh-button" type="button" onClick={loadItems} disabled={loading}>↻ Refresh</button></div>
         {loading && <div className="state-card">Gathering the latest reports…</div>}
         {error && <div className="state-card error-state"><p>{error}</p><button className="text-button" type="button" onClick={loadItems}>Try again →</button></div>}
         {!loading && !error && items.length === 0 && <div className="state-card"><span className="empty-star">✦</span><h3>No reports just yet.</h3><p>Be the first to report a lost item.</p><button className="primary-button" type="button" onClick={openCreateModal}>Report item <span>+</span></button></div>}
         {!loading && !error && items.length > 0 && <div className="items-grid">{items.map((item) => <ItemCard item={item} key={item.id} onOpen={openDetailsModal} />)}</div>}
       </section>
-      {isModalOpen && selectedItem && <Modal title={selectedItem.name} eyebrow="Lost item details" onClose={closeModal}>
+      {isModalOpen && selectedItem && <Modal title={selectedItem.name} eyebrow="Lost item details" onClose={requestModalClose}>
         <div className="item-detail">
           <span className="item-detail-status">{selectedItem.status || 'open'}</span>
           <dl>
@@ -126,7 +133,7 @@ export default function Items({ currentUser, onLogout }) {
           </div>}
         </div>
       </Modal>}
-      {isModalOpen && !selectedItem && <Modal title={editingItem ? 'Edit lost item' : 'Report a lost item'} eyebrow={editingItem ? 'Update report' : 'New report'} onClose={closeModal}><ItemForm editingItem={editingItem} onSaved={handleSaved} /></Modal>}
+      {isModalOpen && !selectedItem && <Modal title={editingItem ? 'Edit lost item' : 'Report a lost item'} eyebrow={editingItem ? 'Update report' : 'New report'} onClose={requestModalClose}><ItemForm editingItem={editingItem} onSaved={handleSaved} onDirtyChange={setIsFormDirty} /></Modal>}
     </main>
   )
 }

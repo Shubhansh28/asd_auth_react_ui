@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { login, signup } from '../api/auth'
 
 export default function Auth({ onAuthenticated }) {
@@ -13,6 +13,7 @@ export default function Auth({ onAuthenticated }) {
   const [success, setSuccess] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
   const isLogin = mode === 'login'
 
   function switchMode(nextMode) {
@@ -39,7 +40,10 @@ export default function Auth({ onAuthenticated }) {
       if (isLogin) {
         const user = await login(credentials)
         onAuthenticated(user)
-        navigate('/items')
+        const destination = location.state?.from
+          ? `${location.state.from.pathname}${location.state.from.search || ''}${location.state.from.hash || ''}`
+          : '/items'
+        navigate(destination, { replace: true })
       } else {
         await signup(credentials)
         // Passwords only ever live in this form state. They are not saved after sign-up.
